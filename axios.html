@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>axios use</title>
+
+</head>
+<body>
+
+    <div id="app"></div>
+
+    <script type="text/javascript" src="js/vue.js"></script>
+    <script type="text/javascript" src="js/vue-router.js"></script>
+    <script type="text/javascript" src="js/axios.js"></script>
+    <script>
+        var App={
+          template: `
+            <div>
+                <button @click="sendAjax">AAAAAAjax</button>
+                response1: {{ res1 }}
+                response2: {{ res2 }}
+            </div>
+          ` ,
+            data: function (){
+              return {
+                  res1: '',
+                  res2: ''
+              }
+            },
+          methods: {
+              sendAjax: function () {
+                  axios.get('http://localhost:3000/getdata',{
+                      params: {
+
+                      }
+                  }).then(function (res) {
+                          console.log(res);
+                      }).catch(function (err) {
+                      console.log(err);
+                  })
+              },
+              sendSomeAjax: function (){
+                  var q1=this.$axios.get('url1');
+                  var q2=this.$axios.post('url2');
+
+                  //合并请求
+                  this.$axios.all([q1,q2])
+                      .then(this.$axios.spread((res1,res2)=> {
+                          // 此处使用箭头函数是为了自动继承this对象
+                           this.res1=res1;
+                           this.res2=res2;
+                      }))
+                      .catch(err=>{
+                          console.log(err);
+                      })
+              }
+          }
+        };
+        Vue.prototype.$axios=axios;
+       new Vue({
+           el: '#app',
+           components: {
+               app: App
+           },
+           template: '<app/>'
+       });
+
+
+    </script>
+
+</body>
+</html>

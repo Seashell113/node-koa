@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>router use</title>
+
+</head>
+<body>
+
+    <div id="app"></div>
+
+    <script type="text/javascript" src="js/vue.js"></script>
+    <script type="text/javascript" src="js/vue-router.js"></script>
+
+    <script>
+        var isLogin=false;
+
+        var Login = {
+            template: `
+                <div>登录
+                <router-view></router-view>
+                </div>
+            `,
+            created: function (){
+                isLogin=true;
+            }
+        }
+        var Register = {
+            template: `
+                <div>注册
+                <router-view></router-view></div>
+            `
+        }
+        var Music = {
+            template: `
+                <div>music~
+                </div>
+            `
+        }
+        var Woman = {
+            template : `
+                <div>W</div>
+            `
+        }
+        var Man = {
+            template : `
+                <div>M</div>
+            `
+        }
+        // 1.安装插件
+        Vue.use(VueRouter);
+        // 2.创建路由对象
+        var router = new VueRouter(
+            // // 直接添加配置
+            // {// 3.配置路由
+            // routes: [
+            //     { name:'login', path: '/login', component: Login ,
+            //         children :[
+            //             { name: 'login.woman', path: 'woman', component: Woman },
+            //             { name: 'login.man', path: 'man', component: Man }
+            //             ]
+            //     },
+            //     { name: 'register', path: '/register/:b', component: Register },
+            //     { name: 'music', path: '/music', component: Music ,meta:{ isChecked: true }} // isChecked属性-路由守卫 给未来的权限控制做参照条件
+            // ]
+            // }
+        );
+        // 多次添加，可动态控制,更加灵活
+        router.addRoutes(
+             [
+                 //默认首页路由
+                 { path:'/',redirect:{name:'login'}},
+
+                { name:'login', path: '/login', component: Login ,
+                    // 嵌套路由  注意router-view也需要嵌套
+                    children :[
+                        { name: 'login.woman', path: 'woman', component: Woman },
+                        { name: 'login.man', path: 'man', component: Man }
+                    ]
+                },
+                { name: 'register', path: '/register/:b', component: Register },
+                { name: 'music', path: '/music', component: Music ,meta:{ isChecked: true } } // isChecked属性-路由守卫 给未来的权限控制做参照条件
+             ]
+
+        );
+        //路由守卫
+        router.beforeEach(function (to,from,next){
+            console.log(to);
+            console.log(from);
+
+            // 不需要验证的放行
+            if(!to.meta.isChecked){
+                next(); // koa 不调用会卡住
+            }else {
+                // 具体权限判断
+                if(isLogin){
+                    next(); // 放行    next(false) 是取消用户导航行为
+                }else {
+                    console.log("not login");
+                    alert("login!")
+                    // 重定向
+                    next({name:'login'})
+                }
+
+            }
+
+        });
+
+
+        // 5.指定路由改变局部位置
+        // router-link标签内用 :to 而不是 to 可以将值作为语句解析而不是字符串，值传入变量的形式时需要使用:to
+        var App = {
+            template: `
+                <div>
+                    <router-link :to="{name: 'login', query: {a:1}}">
+                        登录button
+                    </router-link>
+                    <router-link :to="{name: 'register', params:{b:2}}">
+                        注册button
+                    </router-link>
+
+                    <router-link :to="{name: 'login.woman'}">Woman Login</router-link>
+                    <router-link :to="{name: 'login.man'}">Man Login</router-link>
+
+                    <router-link :to="{name: 'music'}">MMMMusicccc</router-link>
+                    <router-view></router-view>
+                </div>
+            `
+        }
+        // 4.将路由对象关联到vue实例中
+        var vm = new Vue({
+            el: '#app',
+            router: router, // 不加会报错
+            components :{app:App},
+            template: `<app/>`,
+            created: function (){
+                console.log(this.$route);
+                console.log(this.$router);
+
+            }
+        });
+        console.log(vm.$router)
+
+    </script>
+
+</body>
+</html>
